@@ -1,27 +1,25 @@
-# TODO: do not use bare except
-from datetime import date
-from datetime import time
+from Format import Format
 
 
-class Format:
-
+# TODO Nmea
+class Nmea(Format):
     def __init__(self):
         pass
 
     @staticmethod
     def name():
-        return None
+        return "NMEA"
 
     def value(self, s: str = "", f: str = "") -> float:
         """
 
         :param s: value to convert
         :param f: format of value
-        :return: value
+        :return: tuple of value and measure
         """
         return None
 
-    def format(self, s: str, f: str = ''):
+    def format(self, s: str, f: str = '') -> tuple:
         """
 
         :param s: value in str
@@ -29,14 +27,6 @@ class Format:
         :return:
         """
         return None
-
-    def to_format(self, value, f: str = '') -> str:
-        """
-
-        :param value: value
-        :param f: format of value
-        :return: value for format in string
-        """
 
     def convert(self, s: str = '', sep: str = ','):
         return None

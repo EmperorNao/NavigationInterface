@@ -306,7 +306,7 @@ class NavigationUi(QtWidgets.QMainWindow):
         try:
             self._update_ui()
         except:
-            raise ValueError
+            self.error("Error", "Error", "Error")
 
     def export_file(self):
         """
@@ -317,8 +317,7 @@ class NavigationUi(QtWidgets.QMainWindow):
         f = str(self.format_selection.currentText())
         try:
             form = Factory.create(f)
-            form.upload(filename)
-            #upload_file_format(filename)
+            form.upload(filename[0], self.get_info_in_cur_intervals())
         except:
             NavigationUi.error("Export error", "There was an error while trying to export file", "Error")
 
@@ -405,16 +404,27 @@ class NavigationUi(QtWidgets.QMainWindow):
         y_measure = ""
         f = self.format_selection.currentText()
 
-        builder = ValueBuilder(f, cur_x, cur_y, self.get_info_in_cur_intervals())
-        x_measure, y_measure = builder.get_measures()
-        x, y = builder.get_values()
-
-        self.graph_widget.plot(x, y)
-        self.graph_widget.setLabel('left', cur_y + ", " + y_measure)
-        self.graph_widget.setLabel('bottom', cur_x + ", " + x_measure)
-
-        # set x range
         try:
+            builder = ValueBuilder(f, cur_x, cur_y, self.get_info_in_cur_intervals())
+        except KeyError as ke:
+            self.error("Format error", "Wrong format of data", "Error")
+            return
+
+        try:
+            x_measure, y_measure = builder.get_measures()
+            x, y = builder.get_values()
+            self.graph_widget.plot(x, y)
+            self.graph_widget.setLabel('left', cur_y + ", " + y_measure)
+            self.graph_widget.setLabel('bottom', cur_x + ", " + x_measure)
+        except:
+            self.error("X or Y error", "Can't convert and plot data", "Error")
+            return
+
+        # TODO Подумать об ограничениях
+        '''
+        try:
+            pass
             self.graph_widget.setXRange(min(x), max(x))
         except:
-            pass
+            return
+        '''
