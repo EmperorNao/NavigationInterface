@@ -2,8 +2,22 @@ from Format import Format
 
 
 class Nmea(Format):
+    """
+    Class which represent NMEA format
+    """
     def __init__(self):
-        pass
+        self.keys = {
+            "GPGGA": ["UTC_TIME", "LATITUDE", "N/S", "E/W", "POS_FIX", "SATELLITES_USED",
+                      "HDOP", "MSL_ALTITUDE", "UNITS1_", "GEOID_SEPARATION", "UNITS_2",
+                      "AGE_OF_DIFF_CORRECTION", "DIFF_REF_STATION_ID", "CHECKSUM"],
+            "GPGSA": ["MODE_1", "MODE_2", "SATELLITE_USED_1", "SATELLITE_USED_2", "SATELLITE_USED_3", "SATELLITE_USED_4",
+                      "SATELLITE_USED_5", "SATELLITE_USED_6", "SATELLITE_USED_7", "SATELLITE_USED_8", "SATELLITE_USED_9",
+                      "SATELLITE_USED_10", "SATELLITE_USED_11", "SATELLITE_USED_12", "PDOP", "HDOP", "VDOP", "CHECKSUM"],
+            "GPGSV": ["NUMBER_OF_MESSAGES", "MESSAGE_NUMBER", "SATELLITES IN VIEW",
+                      ["SATELLITE_ID", "ELEVATION", "AZIMUTH", "SNR", "CHECKSUM"]],
+            "GPRMC": ["UTC_TIME", "STATUS", "LATITUDE", "N/S", "LONGITUDE", "E/W", "SPEED_OVER_GROUND",
+                      "COURSE_OVER_GROUND", "DATE", "MAGNETIC_VARIATION", "CHECKSUM"]
+        }
 
     @staticmethod
     def name():
@@ -46,6 +60,22 @@ class Nmea(Format):
         :param sep: separator
         :return: return dict of storing in line values
         """
+        content = s.split(",")
+        if content[0] == "$GPGGA":
+            pass
+
+        elif content[0] == "$GPRMC":
+            pass
+
+        elif content[0] == "$GPGSA":
+            pass
+
+        elif content[0] == "$GPGSV":
+            pass
+
+        else:
+            raise KeyError
+
         return None
 
     def load(self, filename: str = "") -> [dict]:
