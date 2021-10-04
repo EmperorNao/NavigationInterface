@@ -5,6 +5,9 @@ from math import modf
 
 
 class SgkT(Format):
+    """
+    Class which represent GLOSPASE SGK-T format
+    """
 
     def __init__(self):
         self.name = "SGK_T"
