@@ -306,7 +306,7 @@ class NavigationUi(QtWidgets.QMainWindow):
         try:
             self._update_ui()
         except:
-            self.error("Error", "Error", "Error")
+            self.error("Format error", "There was an error with format, change format or file", "Error")
 
     def export_file(self):
         """
@@ -319,7 +319,7 @@ class NavigationUi(QtWidgets.QMainWindow):
             form = Factory.create(f)
             form.upload(filename[0], self.get_info_in_cur_intervals())
         except:
-            NavigationUi.error("Export error", "There was an error while trying to export file", "Error")
+            self.error("Export error", "There was an error while trying to export file", "Error")
 
     def transform(self):
         """
@@ -330,7 +330,7 @@ class NavigationUi(QtWidgets.QMainWindow):
         new_format = str(self.format_selection.currentText())
         cur_format = self.model.cur_format
         try:
-            self.model.info = Transformer(cur_format, new_format, self.model.info)
+            self.model.info = Transformer(cur_format, new_format, self.get_info_in_cur_intervals())
             self.model.cur_format = new_format
             self.model.ind = 0
         except:
@@ -356,7 +356,7 @@ class NavigationUi(QtWidgets.QMainWindow):
             else:
                 df.to_csv(filename + '.csv', index=False)
         except:
-            NavigationUi.error("CSV error", "There was an error while trying to create csv file", "Error")
+            self.error("CSV error", "There was an error while trying to create csv file", "Error")
 
     def left_arrow(self):
         """

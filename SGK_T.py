@@ -14,6 +14,10 @@ class SgkT(Format):
 
     @staticmethod
     def name():
+        """
+
+        :return: format name
+        """
         return "SGK_T"
 
     def value(self, s: str = "", f: str = "") -> float:
@@ -260,6 +264,14 @@ class SgkT(Format):
         return output
 
     def plot(self, format_x: str = "", format_y: str = "", info: [dict] = []) -> tuple:
+        """
+        method to abstract plotting with sense of knowing format and values
+        :param format_x:
+        :param format_y:
+        :param info: data to plot
+        :return: return tuple of values for x and y from info
+        """
+
         try:
             x = [self.value(el[format_x], format_x) for el in info]
             y = [self.value(el[format_y], format_y) for el in info]
@@ -268,6 +280,13 @@ class SgkT(Format):
             raise ke
 
     def upload(self, filename: str = "", info: [dict] = []):
+        """
+        load info to file
+        :param filename:
+        :param info: data
+        :return:
+        """
+
         try:
             with open(filename, mode="w") as f:
                 for el in info:
