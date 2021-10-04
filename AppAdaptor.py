@@ -1,6 +1,6 @@
 from Format import *
-from SGK_T import SgkT
-from NMEA import Nmea
+from Formats.SGK_T import SgkT
+from Formats.NMEA import Nmea
 
 
 FORMATS = {("%s" % SgkT.name()), ("%s" % Nmea.name())}

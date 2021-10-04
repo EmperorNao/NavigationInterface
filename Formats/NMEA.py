@@ -12,7 +12,7 @@ class Nmea(Format):
 
         :return: format name
         """
-        return None
+        return "NMEA"
 
     def value(self, s: str = "", f: str = "") -> float:
         """
