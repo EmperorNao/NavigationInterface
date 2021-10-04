@@ -1,6 +1,6 @@
 from Format import *
-from Formats.SGK_T import SgkT
-from Formats.NMEA import Nmea
+from formats.SGK_T import SgkT
+from formats.NMEA import Nmea
 
 
 FORMATS = {("%s" % SgkT.name()), ("%s" % Nmea.name())}
@@ -42,6 +42,10 @@ class ValueBuilder:
 
 
 class Factory:
+    """
+    Class to hide logical creation and decision of formats, all new classes must be define here as creatable
+    and also realize interface Format to work correct
+    """
 
     def __init__(self):
         pass
@@ -63,4 +67,7 @@ class Factory:
 
 # TODO Transforming
 class Transformer:
+    """
+    Class that combine knowledge about formats to convert one to another using their self methods and some metadata
+    """
     pass

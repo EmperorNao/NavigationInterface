@@ -4,7 +4,9 @@ from datetime import time
 
 
 class Format:
-
+    """
+    Interface that provides all methods which new formats must define
+    """
     def __init__(self):
         pass
 

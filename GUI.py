@@ -12,6 +12,9 @@ from PyQt5.QtWidgets import QPushButton
 
 
 class Navigation:
+    """
+    Main class that represent info about current data stored and some technical information
+    """
 
     def __init__(self):
         self.cur_file = ""
@@ -21,6 +24,9 @@ class Navigation:
 
 
 class NavigationUi(QtWidgets.QMainWindow):
+    """
+    Class that provides all UI components and signals to work with them, also it builds main logical dependencies
+    """
 
     def __init__(self, navigation: Navigation):
         super().__init__()
