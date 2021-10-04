@@ -5,7 +5,6 @@ class Nmea(Format):
     def __init__(self):
         pass
 
-
     @staticmethod
     def name():
         """
