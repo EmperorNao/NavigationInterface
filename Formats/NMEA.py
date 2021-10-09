@@ -1,5 +1,7 @@
 from Format import Format
-
+from datetime import date
+from datetime import time
+import pyqtgraph
 
 class Nmea(Format):
     """
@@ -7,17 +9,22 @@ class Nmea(Format):
     """
     def __init__(self):
         self.keys = {
-            "GPGGA": ["UTC_TIME", "LATITUDE", "N/S", "E/W", "POS_FIX", "SATELLITES_USED",
-                      "HDOP", "MSL_ALTITUDE", "UNITS1_", "GEOID_SEPARATION", "UNITS_2",
+            "GPGGA": ["TIME", "LATITUDE", "N/S", "LONGITUDE", "E/W", "POS_FIX", "SATELLITES_USED",
+                      "HDOP", "MSL_ALTITUDE", "UNITS_1", "GEOID_SEPARATION", "UNITS_2",
                       "AGE_OF_DIFF_CORRECTION", "DIFF_REF_STATION_ID", "CHECKSUM"],
-            "GPGSA": ["MODE_1", "MODE_2", "SATELLITE_USED_1", "SATELLITE_USED_2", "SATELLITE_USED_3", "SATELLITE_USED_4",
-                      "SATELLITE_USED_5", "SATELLITE_USED_6", "SATELLITE_USED_7", "SATELLITE_USED_8", "SATELLITE_USED_9",
-                      "SATELLITE_USED_10", "SATELLITE_USED_11", "SATELLITE_USED_12", "PDOP", "HDOP", "VDOP", "CHECKSUM"],
-            "GPGSV": ["NUMBER_OF_MESSAGES", "MESSAGE_NUMBER", "SATELLITES IN VIEW",
-                      ["SATELLITE_ID", "ELEVATION", "AZIMUTH", "SNR", "CHECKSUM"]],
-            "GPRMC": ["UTC_TIME", "STATUS", "LATITUDE", "N/S", "LONGITUDE", "E/W", "SPEED_OVER_GROUND",
-                      "COURSE_OVER_GROUND", "DATE", "MAGNETIC_VARIATION", "CHECKSUM"]
+            "GPGSA": ["MODE_1", "MODE_2", "SATELLITE_USED_01", "SATELLITE_USED_02", "SATELLITE_USED_03",
+                      "SATELLITE_USED_04",
+                      "SATELLITE_USED_05", "SATELLITE_USED_06", "SATELLITE_USED_07", "SATELLITE_USED_08",
+                      "SATELLITE_USED_09",
+                      "SATELLITE_USED_10", "SATELLITE_USED_11", "SATELLITE_USED_12", "PDOP", "HDOP", "VDOP",
+                      "CHECKSUM"],
+            "GPGSV": ["NUMBER_OF_MESSAGES", "MESSAGE_NUMBER", "SATELLITES_IN_VIEW", "CHECKSUM"],
+            "GPRMC": ["TIME", "STATUS", "LATITUDE", "N/S", "LONGITUDE", "E/W", "SPEED_OVER_GROUND",
+                      "COURSE_OVER_GROUND", "DATE", "MAGNETIC_VARIATION", "CHECKSUM"],
+            "SATELLITE": ["SATELLITE_ID", "ELEVATION", "AZIMUTH", "SNR"]
         }
+        self.plot_vars = ["TIME", "LATITUDE", "LONGITUDE", "HDOP", "PDOP", "VDOP", "SPEED_OVER_GROUND",
+                          "COURSE_OVER_GROUND", "ELEVATION", "AZIMUTH", "SNR"]
 
     @staticmethod
     def name():
@@ -27,6 +34,97 @@ class Nmea(Format):
         """
         return "NMEA"
 
+    def to_str(self, d) -> str:
+        """
+
+        :param d: data to repr
+        :return: representation of all information
+        """
+        o = []
+        if isinstance(d, dict):
+            for k, v in d.items():
+                o.append(str(k) + ": " + self.to_str(v))
+
+        elif isinstance(d, list):
+            for el in d:
+                o.append(self.to_str(el))
+
+        else:
+            o.append(str(d))
+
+        return "\n".join(o)
+
+    def measure(self, f: str = '') -> str:
+        """
+
+        :param f: format of value
+        :return: measurement to this format
+        """
+        if f == "TIME":
+            return "minute"
+        elif f == 'LATITUDE':
+            return "degree"
+        elif f == 'N/S':
+            return "__"
+        elif f == 'LONGITUDE':
+            return "degree"
+        elif f == "E/W":
+            return "__"
+        elif f == "POS_FIX":
+            return "__"
+        elif f == "SATELLITES_USED":
+            return "__"
+        elif f == "HDOP":
+            return "HDOP"
+        elif f == "MSL_ALTITUDE":
+            return "meters"
+        elif f == "UNITS_1":
+            return "__"
+        elif f == "GEOID_SEPARATION":
+            return "meters"
+        elif f == "UNITS_2":
+            return "__"
+        elif f == "AGE_OF_DIFF_CORRECTION":
+            return "seconds"
+        elif f == "DIFF_REF_STATION_ID":
+            return "__"
+        elif f == "CHECKSUM":
+            return "__"
+        elif f == "MODE_1":
+            return "__"
+        elif f == "MODE_2":
+            return "__"
+        elif f[:-2] == "SATELLITE_USED_":
+            return "__"
+        elif f == "PDOP":
+            return "PDOP"
+        elif f == "VDOP":
+            return "VDOP"
+        elif f == "STATUS":
+            return "__"
+        elif f == "SPEED_OVER_GROUND":
+            return "usels"
+        elif f == "COURSE_OVER_GROUND":
+            return "degrees"
+        elif f == "DATE":
+            return "__"
+        elif f == "MAGNETIC_VARIATION":
+            return "degrees"
+        elif f == "NUMBER_OF_MESSAGES":
+            return "__"
+        elif f == "MESSAGE_NUMBER":
+            return "__"
+        elif f == "SATELLITES_IN_VIEW":
+            return "__"
+        elif f == "ELEVATION":
+            return "degrees"
+        elif f == "AZIMUTH":
+            return "degrees"
+        elif f == "SNR":
+            return "DBHz"
+        else:
+            raise KeyError("Don't find right format for NMEA")
+
     def value(self, s: str = "", f: str = "") -> float:
         """
         get value as number for current format
@@ -34,7 +132,73 @@ class Nmea(Format):
         :param f: format of value
         :return: value as number
         """
-        return None
+        if s == "":
+            raise ValueError("Value in str was empty")
+
+        if f == "TIME":
+            return int(s.hour) * 60 + int(s.minute) + float(s.second) / 60 + float(s.microsecond) / (60 * 1000)
+        elif f == 'LATITUDE':
+            return float(s)
+        elif f == 'N/S':
+            raise ValueError
+        elif f == 'LONGITUDE':
+            return float(s)
+        elif f == "E/W":
+            raise ValueError
+        elif f == "POS_FIX":
+            return int(s)
+        elif f == "SATELLITES_USED":
+            return int(s)
+        elif f == "HDOP":
+            return float(s)
+        elif f == "MSL_ALTITUDE":
+            return float(s)
+        elif f == "UNITS_1":
+            raise ValueError
+        elif f == "GEOID_SEPARATION":
+            return float(s)
+        elif f == "UNITS_2":
+            raise ValueError
+        elif f == "AGE_OF_DIFF_CORRECTION":
+            return float(s)
+        elif f == "DIFF_REF_STATION_ID":
+            raise ValueError
+        elif f == "CHECKSUM":
+            raise ValueError
+        elif f == "MODE_1":
+            raise ValueError
+        elif f == "MODE_2":
+            raise ValueError
+        elif f[:-2] == "SATELLITE_USED_":
+            return int(s)
+        elif f == "PDOP":
+            return float(s)
+        elif f == "VDOP":
+            return float(s)
+        elif f == "STATUS":
+            raise ValueError
+        elif f == "SPEED_OVER_GROUND":
+            return float(s)
+        elif f == "COURSE_OVER_GROUND":
+            return float(s)
+        elif f == "DATE":
+            raise ValueError
+        elif f == "MAGNETIC_VARIATION":
+            return float(s)
+        elif f == "NUMBER_OF_MESSAGES":
+            raise ValueError
+        elif f == "MESSAGE_NUMBER":
+            raise ValueError
+        elif f == "SATELLITES_IN_VIEW":
+            raise ValueError
+        elif f == "ELEVATION":
+            return int(s)
+        elif f == "AZIMUTH":
+            return int(s)
+        elif f == "SNR":
+            return int(s)
+        else:
+            raise KeyError("Don't find right format for NMEA")
 
     def format(self, s: str, f: str = ''):
         """
@@ -43,7 +207,77 @@ class Nmea(Format):
         :param f: format of value
         :return: value in correct type to store
         """
-        return None
+        if s == "":
+            raise ValueError("Value in str was empty")
+
+        if f == "TIME":
+            h = int(s[0:2])
+            m = int(s[2:4])
+            sec = int(s[4:6])
+            mcs = int(s[7:9]) * 10000
+            return time(hour=h, minute=m, second=sec, microsecond=mcs)
+        elif f == 'LATITUDE':
+            return int(s[0:2]) + float(s[2:]) / 60
+        elif f == 'N/S':
+            return s
+        elif f == 'LONGITUDE':
+            return int(s[0:3]) + float(s[3:]) / 60
+        elif f == "E/W":
+            return s
+        elif f == "POS_FIX":
+            return int(s)
+        elif f == "SATELLITES_USED":
+            return int(s)
+        elif f == "HDOP":
+            return float(s)
+        elif f == "MSL_ALTITUDE":
+            return float(s)
+        elif f == "UNITS_1":
+            return s
+        elif f == "GEOID_SEPARATION":
+            return s
+        elif f == "UNITS_2":
+            return s
+        elif f == "AGE_OF_DIFF_CORRECTION":
+            return s
+        elif f == "DIFF_REF_STATION_ID":
+            return s
+        elif f == "CHECKSUM":
+            return s
+        elif f == "MODE_1":
+            return s
+        elif f == "MODE_2":
+            return s
+        elif f[:-2] == "SATELLITE_USED_":
+            return int(s)
+        elif f == "PDOP":
+            return float(s)
+        elif f == "VDOP":
+            return float(s)
+        elif f == "STATUS":
+            return s
+        elif f == "SPEED_OVER_GROUND":
+            return float(s)
+        elif f == "COURSE_OVER_GROUND":
+            return float(s)
+        elif f == "DATE":
+            return date(day=int(s[0:2]), month=int(s[2:4]), year=int(s[4:6]) + 2000)
+        elif f == "MAGNETIC_VARIATION":
+            return float(s)
+        elif f == "NUMBER_OF_MESSAGES":
+            return int(s)
+        elif f == "MESSAGE_NUMBER":
+            return int(s)
+        elif f == "SATELLITES_IN_VIEW":
+            return int(s)
+        elif f == "ELEVATION":
+            return int(s)
+        elif f == "AZIMUTH":
+            return int(s)
+        elif f == "SNR":
+            return int(s)
+        else:
+            raise KeyError("Don't find right format for NMEA")
 
     def to_format(self, value, f: str = '') -> str:
         """
@@ -61,22 +295,40 @@ class Nmea(Format):
         :return: return dict of storing in line values
         """
         content = s.split(",")
-        if content[0] == "$GPGGA":
-            pass
+        last = content.pop()
+        content += last.split("*")
+        message_id = content[0].strip("\ufeff")[1:]
 
-        elif content[0] == "$GPRMC":
-            pass
+        output = {}
+        output["MESSAGE_ID"] = message_id
+        if message_id == "GPGSV":
+            output["NUMBER_OF_MESSAGES"] = self.format(content[1], "NUMBER_OF_MESSAGES")
+            output["MESSAGE_NUMBER"] = self.format(content[2], "MESSAGE_NUMBER")
+            output["SATELLITES_IN_VIEW"] = self.format(content[3], "SATELLITES_IN_VIEW")
+            output["SATELLITES"] = []
+            for i in range(4, len(content) - 1, 4):
 
-        elif content[0] == "$GPGSA":
-            pass
+                d = {}
+                for j, key in enumerate(self.keys["SATELLITE"]):
+                    d[key] = content[i + j]
+                output["SATELLITES"].append(d)
 
-        elif content[0] == "$GPGSV":
-            pass
+            output["CHECKSUM"] = self.format(content[-1], "CHECKSUM")
+
+        elif message_id in self.keys.keys():
+            for i, f in enumerate(self.keys[message_id]):
+                if content[i + 1] != "":
+                    try:
+                        output[f] = self.format(content[i + 1], f)
+                    except ValueError as ve:
+                        raise ve
+                    except KeyError as ke:
+                        raise ke
 
         else:
-            raise KeyError
+            raise KeyError("Missing format of message in NMEA message")
 
-        return None
+        return output
 
     def load(self, filename: str = "") -> [dict]:
         """
@@ -84,17 +336,154 @@ class Nmea(Format):
         :param filename:
         :return: list of dicts values
         """
-        return None
 
-    def plot(self, format_x, format_y, info: [dict] = []) -> tuple:
+        try:
+            c = []
+            with open(filename, encoding='utf8') as file:
+
+                file = file.readlines()
+                cur_d = {}
+                i = 0
+
+                while i < len(file):
+
+                    d = self.convert(file[i][:-1])
+                    msg_id = d['MESSAGE_ID']
+                    if msg_id != "GPGSV" and msg_id in cur_d.keys():
+                        cur_d["TIME"] = cur_d["GPGGA"]["TIME"]
+                        c.append(cur_d)
+                        cur_d = {}
+                        continue
+
+                    elif msg_id == "GPGSV":
+
+                        satellites = [d]
+                        num_msg = d["NUMBER_OF_MESSAGES"]
+                        for j in range(1, num_msg):
+                            add_d = self.convert(file[i + j][:-1])
+                            satellites.append(add_d)
+
+                        cur_d["GPGSV"] = satellites
+                        i += num_msg
+
+                    else:
+                        cur_d[d["MESSAGE_ID"]] = d
+                        i += 1
+
+            return c
+
+        except ValueError as ve:
+            raise ve
+        except KeyError as ke:
+            raise ke
+
+    def plot(self, format_x, format_y, info: [dict] = [], plotter: pyqtgraph.PlotWidget = None) -> None:
         """
         method to abstract plotting with sense of knowing format and values
         :param format_x:
         :param format_y:
         :param info: data to plot
-        :return: return tuple of values for x and y from info
+        :param: plotter: class to plot that provides method plot
+        :return:
         """
-        return None
+
+        if format_x == "LONGITUDE" and format_y == "LATITUDE":
+            x = [self.value(el["GPRMC"][format_x], format_x) if format_x in el["GPRMC"].keys()
+                 else 0 for el in info]
+
+            y = [self.value(el["GPRMC"][format_y], format_x) if format_y in el["GPRMC"].keys()
+                 else 0 for el in info]
+            plotter.plot(x, y, pen=pyqtgraph.mkPen('w'))
+
+            hdop_format = "HDOP"
+            hdop = [self.value(el["GPGGA"][hdop_format], hdop_format) if hdop_format
+                    in el["GPGGA"].keys() else 0 for el in info]
+
+            h = []
+            num = len(x)
+            max_y = max(y)
+            for i in range(0, num):
+                h.append(y[i] + hdop[i])
+            plotter.plot(x, h, pen=pyqtgraph.mkPen('b'))
+
+            h = []
+            for i in range(0, num):
+                h.append(y[i] - hdop[i])
+            plotter.plot(x, h, pen=pyqtgraph.mkPen('r'))
+            return
+
+        elif format_x == "TIME" and format_y == "LATITUDE":
+            "VDOP"
+
+        elif format_x == "AZIMUTH" and format_y == "ZENITH":
+            pass
+
+        x = []
+        for k, v in self.var_keys().items():
+            if format_x in v:
+                x = [self.value(el[k][format_x], format_x) if format_x in el[k].keys() else 0
+                     for el in info]
+
+        y = []
+        for k, v in self.var_keys().items():
+            if format_y in v:
+                y = [self.value(el[k][format_y], format_y) if format_x in el[k].keys() else 0
+                     for el in info[k]]
+
+        plotter.plot(x, y)
+        '''    
+        if format_x == "LATITUDE":
+            x = [self.value(el[format_x], format_x) for el in info['GPGGA']]
+        elif format_x == "LONGITUDE":
+
+        elif format_x == "HDOP":
+            pass
+        elif format_x == "PDOP":
+            pass
+        elif format_x == "VDOP":
+            pass
+        elif format_x == "SPEED_OVER_GROUND":
+            pass
+        elif format_x == "COURSE_OVER_GROUND":
+            pass
+        elif format_x == "ELEVATION":
+            pass
+        elif format_x == "AZIMUTH":
+            pass
+        elif format_x == "SNR":
+            pass
+        '''
+
+        '''
+        if format_y == "LATITUDE":
+            pass
+        elif format_y == "LONGITUDE":
+            pass
+        elif format_y == "HDOP":
+            pass
+        elif format_y == "PDOP":
+            pass
+        elif format_y == "VDOP":
+            pass
+        elif format_y == "SPEED_OVER_GROUND":
+            pass
+        elif format_y == "COURSE_OVER_GROUND":
+            pass
+        elif format_y == "ELEVATION":
+            pass
+        elif format_y == "AZIMUTH":
+            pass
+        elif format_y == "SNR":
+            pass
+        '''
+
+        try:
+
+            x = [self.value(el[format_x], format_x) for el in info]
+            y = [self.value(el[format_y], format_y) for el in info]
+            return x, y
+        except KeyError as ke:
+            raise ke
 
     def upload(self, filename: str = "", info: [dict] = []):
         """

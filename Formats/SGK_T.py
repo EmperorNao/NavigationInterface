@@ -1,6 +1,7 @@
 from Format import Format
 from datetime import date
 from datetime import time
+import pyqtgraph
 from math import modf
 
 
@@ -14,6 +15,8 @@ class SgkT(Format):
         self.keys = ['DEVICE_ID', 'DATE', 'TIME', 'LATITUDE', 'N/S', 'LONGITUDE', 'E/W',
                 'SPEED', 'COURSE', 'ALTITUDE', 'ODOMETER', 'IO_STATUS', 'EVENT_ID', 'AIN1', 'AIN2',
                 'FIX_MODE', ('%s_SAT_NO' % self.name), 'GPS_SAT_NO', 'HDOP']
+        self.plot_vars = ['TIME', 'LATITUDE', 'LONGITUDE',
+                'SPEED', 'COURSE', 'ALTITUDE', 'HDOP']
 
     @staticmethod
     def name():
@@ -137,7 +140,7 @@ class SgkT(Format):
         elif f == 'TIME':
             return time(int(s[0:2]), int(s[2:4]), int(s[4:6]))
         elif f == 'LATITUDE':
-            return int(s[0:3]) + float(s[2:]) / 60
+            return int(s[0:3]) + float(s[3:]) / 60
         elif f == 'N/S':
             return s
         elif f == 'LONGITUDE':
@@ -266,19 +269,20 @@ class SgkT(Format):
 
         return output
 
-    def plot(self, format_x: str = "", format_y: str = "", info: [dict] = []) -> tuple:
+    def plot(self, format_x, format_y, info: [dict] = [], plotter: pyqtgraph.PlotWidget = None) -> None:
         """
         method to abstract plotting with sense of knowing format and values
         :param format_x:
         :param format_y:
         :param info: data to plot
-        :return: return tuple of values for x and y from info
+        :param: plotter: class to plot that provides method plot
+        :return:
         """
 
         try:
             x = [self.value(el[format_x], format_x) for el in info]
             y = [self.value(el[format_y], format_y) for el in info]
-            return x, y
+            plotter.plot(x, y)
         except KeyError as ke:
             raise ke
 
@@ -307,3 +311,14 @@ class SgkT(Format):
             raise ke
 
         return
+
+    def __str__(self, d: dict = {}) -> str:
+        """
+
+        :param d: data to repr
+        :return: representation of all information
+        """
+        out = []
+        for k, val in d.items():
+            out.append(str(k) + ": " + str(val))
+        return "\n".join(out)
