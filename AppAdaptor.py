@@ -30,15 +30,18 @@ class ValueBuilder:
         except:
             raise KeyError
 
-    def get_values(self) -> ():
+    def plot(self, plotter):
         """
-
-        :return: pair of list with x and y given values
+        method that call form to plot values
+        :param plotter: plotter to plot
+        :return:
         """
         try:
-            return self.form.plot(self.cur_x, self.cur_y, self.info)
-        except:
-            raise ValueError
+            self.form.plot(self.cur_x, self.cur_y, self.info, plotter)
+        except KeyError as ke:
+            raise ke
+        except ValueError as ve:
+            raise ve
 
 
 class Factory:

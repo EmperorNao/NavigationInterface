@@ -2,13 +2,41 @@
 from datetime import date
 from datetime import time
 
+import pyqtgraph
+
 
 class Format:
     """
     Interface that provides all methods which new formats must define
     """
     def __init__(self):
+        # all variables in format
+        self.keys = []
+        # plottable variables in format
+        self.plot_vars = []
         pass
+
+    def var_keys(self):
+        """
+
+        :return: all variables in format
+        """
+        return self.keys
+
+    def plot_keys(self):
+        """
+
+        :return: all plottable variables
+        """
+        return self.plot_vars
+
+    def to_str(self, d: dict = {}) -> str:
+        """
+
+        :param d: data to repr
+        :return: representation of all information
+        """
+        return None
 
     @staticmethod
     def name():
@@ -26,6 +54,13 @@ class Format:
         :return: value as number
         """
         return None
+
+    def measure(self, f: str = '') -> str:
+        """
+
+        :param f: format of value
+        :return: measurement to this format
+        """
 
     def format(self, s: str, f: str = ''):
         """
@@ -61,13 +96,14 @@ class Format:
         """
         return None
 
-    def plot(self, format_x, format_y, info: [dict] = []) -> tuple:
+    def plot(self, format_x, format_y, info: [dict] = [], plotter: pyqtgraph.PlotWidget = None) -> tuple:
         """
         method to abstract plotting with sense of knowing format and values
         :param format_x:
         :param format_y:
         :param info: data to plot
-        :return: return tuple of values for x and y from info
+        :param: plotter: class to plot that provides method plot
+        :return:
         """
         return None
 
@@ -79,5 +115,3 @@ class Format:
         :return:
         """
         return
-
-

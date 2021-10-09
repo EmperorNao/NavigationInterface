@@ -183,6 +183,13 @@ class NavigationUi(QtWidgets.QMainWindow):
         except:
             raise ValueError
 
+    def get_current_format(self):
+        """
+
+        :return: method return current selected format
+        """
+        return str(self.format_selection.currentText())
+
     def _update_variables_combobox(self):
         """
         method updates variable names in boxes
@@ -190,10 +197,13 @@ class NavigationUi(QtWidgets.QMainWindow):
         """
         self.cur_x.clear()
         self.cur_y.clear()
+        f = self.get_current_format()
         if self.model.ind >= len(self.model.info):
             var = []
         else:
-            var = [el for el in self.model.info[self.model.ind].keys()]
+            form = Factory().create(f)
+            plot_keys = form.plot_keys()
+            var = [el for el in plot_keys]
 
         for val in var:
             self.cur_x.addItem(val)
@@ -205,11 +215,18 @@ class NavigationUi(QtWidgets.QMainWindow):
         :return:
         """
         self.content.clear()
+        f = str(self.format_selection.currentText())
         try:
+            #TODO change as str(Format)
+            form = Factory.create(f)
+            self.content.append(form.to_str(self.model.info[self.model.ind]))
+            pass
+            """
             for k, val in self.model.info[self.model.ind].items():
                 self.content.append(str(k) + ": " + str(val) + "\n")
+            """
         except:
-            raise ValueError
+            raise ValueError(f"There was en error while loading {form.name()} content")
 
     def _update_intervals(self):
         """
@@ -418,12 +435,12 @@ class NavigationUi(QtWidgets.QMainWindow):
 
         try:
             x_measure, y_measure = builder.get_measures()
-            x, y = builder.get_values()
+            builder.plot(self.graph_widget)
             self.graph_widget.plot(x, y)
             self.graph_widget.setLabel('left', cur_y + ", " + y_measure)
             self.graph_widget.setLabel('bottom', cur_x + ", " + x_measure)
-        except:
-            self.error("X or Y error", "Can't convert and plot data", "Error")
+        except BaseException as be:
+            self.error("X or Y error", "Can't convert and plot data", str(be))
             return
 
         # TODO Подумать об ограничениях
