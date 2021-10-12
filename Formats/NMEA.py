@@ -23,7 +23,7 @@ class Nmea(Format):
                       "COURSE_OVER_GROUND", "DATE", "MAGNETIC_VARIATION", "CHECKSUM"],
             "SATELLITE": ["SATELLITE_ID", "ELEVATION", "AZIMUTH", "SNR"]
         }
-        self.plot_vars = ["TIME", "LATITUDE", "LONGITUDE", "HDOP", "PDOP", "VDOP", "SPEED_OVER_GROUND",
+        self.plot_vars = ["TIME", "MSL_ALTITUDE", "LATITUDE", "LONGITUDE", "HDOP", "PDOP", "VDOP", "SPEED_OVER_GROUND",
                           "COURSE_OVER_GROUND", "ELEVATION", "AZIMUTH", "SNR"]
 
     @staticmethod
@@ -393,10 +393,10 @@ class Nmea(Format):
 
             y = [self.value(el["GPRMC"][format_y], format_x) if format_y in el["GPRMC"].keys()
                  else 0 for el in info]
-            plotter.plot(x, y, pen=pyqtgraph.mkPen('w'))
+            #plotter.plot(x, y, pen=pyqtgraph.mkPen('w'))
 
             hdop_format = "HDOP"
-            hdop = [self.value(el["GPGGA"][hdop_format], hdop_format) if hdop_format
+            hdop = [self.value(el["GPGGA"][hdop_format], hdop_format) / 6371000 if hdop_format
                     in el["GPGGA"].keys() else 0 for el in info]
 
             h = []
@@ -410,13 +410,69 @@ class Nmea(Format):
             for i in range(0, num):
                 h.append(y[i] - hdop[i])
             plotter.plot(x, h, pen=pyqtgraph.mkPen('r'))
+
+            plotter.plot(x, y, pen=pyqtgraph.mkPen('w'))
             return
 
-        elif format_x == "TIME" and format_y == "LATITUDE":
-            "VDOP"
+        elif format_x == "TIME" and format_y == "MSL_ALTITUDE":
+            x = [self.value(el["GPGGA"][format_x], format_x) if format_x in el["GPGGA"].keys()
+                 else 0 for el in info]
 
-        elif format_x == "AZIMUTH" and format_y == "ZENITH":
-            pass
+            y = [self.value(el["GPGGA"][format_y], format_x) if format_y in el["GPGGA"].keys()
+                 else 0 for el in info]
+            #plotter.plot(x, y, pen=pyqtgraph.mkPen('w'))
+
+            vdop_format = "VDOP"
+            vdop = [self.value(el["GPGSA"][vdop_format], vdop_format) / 6371000 if vdop_format
+                    in el["GPGSA"].keys() else 0 for el in info]
+
+            v = []
+            num = len(x)
+            max_y = max(y)
+            for i in range(0, num):
+                v.append(y[i] + vdop[i])
+            plotter.plot(x, v, pen=pyqtgraph.mkPen('b'))
+
+            v = []
+            for i in range(0, num):
+                v.append(y[i] - vdop[i])
+            plotter.plot(x, v, pen=pyqtgraph.mkPen('r'))
+
+            plotter.plot(x, y, pen=pyqtgraph.mkPen('w'))
+            return
+
+        elif format_x == "AZIMUTH" and format_y == "ELEVATION":
+
+            colors = ["g", "r", "c", "m", "y", "k", "w", (100, 100, 100), (200, 200, 200), (150, 150, 150), (50, 50, 50), (50, 150, 200)]
+            d = {}
+            for el in info:
+
+                for msg in el["GPGSV"]:
+
+                    for sat in msg['SATELLITES']:
+                        id = sat["SATELLITE_ID"]
+                        try:
+                            if id in d.keys():
+                                d[id].append([self.value(sat["AZIMUTH"], "AZIMUTH"), 90 - self.value(sat["ELEVATION"], "ELEVATION")])
+
+                            else:
+                                d[id] = [[self.value(sat["AZIMUTH"], "AZIMUTH"), 90 - self.value(sat["ELEVATION"], "ELEVATION")]]
+                        except ValueError as ve:
+                            pass
+
+            plotter.setBackground((30, 30, 30))
+            plotter.addLegend()
+            for i, id in enumerate(d.keys()):
+
+                x = []
+                y = []
+                for x_, y_ in d[id]:
+                    x.append(x_)
+                    y.append(y_)
+
+                plotter.plot(x, y, pen=pyqtgraph.mkPen(colors[i % (len(colors))]), name=id)
+
+            return
 
         x = []
         for k, v in self.var_keys().items():

@@ -26,6 +26,17 @@ class SgkT(Format):
         """
         return "SGK_T"
 
+    def to_str(self, d: dict = {}) -> str:
+        """
+
+        :param d: data to repr
+        :return: representation of all information
+        """
+        out = []
+        for k, v in d.items():
+            out.append(str(k) + ": " + str(v))
+        return "\n".join(out)
+
     def value(self, s: str = "", f: str = "") -> float:
         """
 
