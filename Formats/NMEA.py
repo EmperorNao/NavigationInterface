@@ -393,7 +393,6 @@ class Nmea(Format):
 
             y = [self.value(el["GPRMC"][format_y], format_x) if format_y in el["GPRMC"].keys()
                  else 0 for el in info]
-            #plotter.plot(x, y, pen=pyqtgraph.mkPen('w'))
 
             hdop_format = "HDOP"
             hdop = [self.value(el["GPGGA"][hdop_format], hdop_format) / 6371000 if hdop_format
@@ -420,7 +419,6 @@ class Nmea(Format):
 
             y = [self.value(el["GPGGA"][format_y], format_x) if format_y in el["GPGGA"].keys()
                  else 0 for el in info]
-            #plotter.plot(x, y, pen=pyqtgraph.mkPen('w'))
 
             vdop_format = "VDOP"
             vdop = [self.value(el["GPGSA"][vdop_format], vdop_format) / 6371000 if vdop_format
@@ -487,59 +485,6 @@ class Nmea(Format):
                      for el in info[k]]
 
         plotter.plot(x, y)
-        '''    
-        if format_x == "LATITUDE":
-            x = [self.value(el[format_x], format_x) for el in info['GPGGA']]
-        elif format_x == "LONGITUDE":
-
-        elif format_x == "HDOP":
-            pass
-        elif format_x == "PDOP":
-            pass
-        elif format_x == "VDOP":
-            pass
-        elif format_x == "SPEED_OVER_GROUND":
-            pass
-        elif format_x == "COURSE_OVER_GROUND":
-            pass
-        elif format_x == "ELEVATION":
-            pass
-        elif format_x == "AZIMUTH":
-            pass
-        elif format_x == "SNR":
-            pass
-        '''
-
-        '''
-        if format_y == "LATITUDE":
-            pass
-        elif format_y == "LONGITUDE":
-            pass
-        elif format_y == "HDOP":
-            pass
-        elif format_y == "PDOP":
-            pass
-        elif format_y == "VDOP":
-            pass
-        elif format_y == "SPEED_OVER_GROUND":
-            pass
-        elif format_y == "COURSE_OVER_GROUND":
-            pass
-        elif format_y == "ELEVATION":
-            pass
-        elif format_y == "AZIMUTH":
-            pass
-        elif format_y == "SNR":
-            pass
-        '''
-
-        try:
-
-            x = [self.value(el[format_x], format_x) for el in info]
-            y = [self.value(el[format_y], format_y) for el in info]
-            return x, y
-        except KeyError as ke:
-            raise ke
 
     def upload(self, filename: str = "", info: [dict] = []):
         """
