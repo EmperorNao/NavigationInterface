@@ -1,5 +1,5 @@
 # Start
-All you need to start - install dependencies.
+Install dependencies.
 ```
 pip install -r requirements.txt
 ```
