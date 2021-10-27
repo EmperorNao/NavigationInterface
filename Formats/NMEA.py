@@ -2,6 +2,7 @@ from Format import Format
 from datetime import date
 from datetime import time
 import pyqtgraph
+from math import sin, cos, pi
 
 class Nmea(Format):
     """
@@ -450,11 +451,13 @@ class Nmea(Format):
                     for sat in msg['SATELLITES']:
                         id = sat["SATELLITE_ID"]
                         try:
+                            r = 90 - self.value(sat["ELEVATION"], "ELEVATION")
+                            alpha = self.value(sat["AZIMUTH"], "AZIMUTH") * pi / 180
                             if id in d.keys():
-                                d[id].append([self.value(sat["AZIMUTH"], "AZIMUTH"), 90 - self.value(sat["ELEVATION"], "ELEVATION")])
+                                d[id].append([r * cos(alpha), r * sin(alpha)])
 
                             else:
-                                d[id] = [[self.value(sat["AZIMUTH"], "AZIMUTH"), 90 - self.value(sat["ELEVATION"], "ELEVATION")]]
+                                d[id] = [[r * cos(alpha), r * sin(alpha)]]
                         except ValueError as ve:
                             pass
 
@@ -468,8 +471,43 @@ class Nmea(Format):
                     x.append(x_)
                     y.append(y_)
 
-                plotter.plot(x, y, pen=pyqtgraph.mkPen(colors[i % (len(colors))]), name=id)
+                plotter.plot(x, y, pen=pyqtgraph.mkPen(colors[i % (len(colors))], width = 3), name=id)
 
+            xs = []
+            ys = []
+
+            r = 90
+            x = []
+            y = []
+            for alpha in range(0, 360):
+                alpha = alpha * pi / 180
+                x.append(r * cos(alpha))
+                y.append(r * sin(alpha))
+            xs.append(x)
+            ys.append(y)
+
+            r = 60
+            x = []
+            y = []
+            for alpha in range(0, 360):
+                alpha = alpha * pi / 180
+                x.append(r * cos(alpha))
+                y.append(r * sin(alpha))
+            xs.append(x)
+            ys.append(y)
+
+            r = 30
+            x = []
+            y = []
+            for alpha in range(0, 360):
+                alpha = alpha * pi / 180
+                x.append(r * cos(alpha))
+                y.append(r * sin(alpha))
+            xs.append(x)
+            ys.append(y)
+
+            for i in range(len(xs)):
+                plotter.plot(xs[i], ys[i], pen=pyqtgraph.mkPen("w", width=1), name=id)
             return
 
         x = []
