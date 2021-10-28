@@ -1,9 +1,10 @@
 from Format import *
 from formats.SGK_T import SgkT
 from formats.NMEA import Nmea
+from formats.Statistic import Statistic
 
 
-FORMATS = {("%s" % SgkT.name()), ("%s" % Nmea.name())}
+FORMATS = {("%s" % SgkT.name()), ("%s" % Nmea.name()), ("%s" % Statistic.name())}
 
 
 class ValueBuilder:
@@ -64,6 +65,8 @@ class Factory:
             return SgkT()
         if format == Nmea.name():
             return Nmea()
+        if format == Statistic.name():
+            return Statistic()
         else:
             raise ValueError
 

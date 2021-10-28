@@ -3,8 +3,8 @@ import numpy as np
 
 class NavigationSignalReceiver:
 
-    def __init__(self, values):
-        self.values = None
+    def __init__(self, values=None):
+        self.values = values
 
     def set_values(self, values):
         self.values = values
@@ -18,6 +18,6 @@ class NavigationSignalReceiver:
     def get_cov_matrix(self):
         pass
 
-    def get_Q(self):
+    def get_q(self):
         pass
 
