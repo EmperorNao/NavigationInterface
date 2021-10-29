@@ -1,9 +1,10 @@
-# Start
-Install dependencies.
+# Курсовая по ИВС
+Установить зависимости
 ```
 pip install -r requirements.txt
 ```
-To start application, call main program
+Запуск
 ```
 python App.py
 ```
+
