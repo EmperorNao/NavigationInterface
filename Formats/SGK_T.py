@@ -1,4 +1,4 @@
-from Format import Format
+from formats.Format import Format
 from datetime import date
 from datetime import time
 import pyqtgraph

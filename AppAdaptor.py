@@ -1,4 +1,4 @@
-from Format import *
+from formats.Format import *
 from formats.SGK_T import SgkT
 from formats.NMEA import Nmea
 from formats.Statistic import Statistic

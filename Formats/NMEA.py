@@ -1,8 +1,9 @@
-from Format import Format
+from formats.Format import Format
 from datetime import date
 from datetime import time
 import pyqtgraph
 from math import sin, cos, pi
+
 
 class Nmea(Format):
     """

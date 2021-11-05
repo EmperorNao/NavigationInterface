@@ -11,9 +11,9 @@ from PyQt5.QtWidgets import QGridLayout
 from PyQt5.QtWidgets import QPushButton
 
 
-class Navigation:
+class NavigationModel:
     """
-    Main class that represent info about current data stored and some technical information
+    Main class that represent info about current data stored and some technical information for navigation
     """
 
     def __init__(self):
@@ -26,9 +26,10 @@ class Navigation:
 class NavigationUi(QtWidgets.QMainWindow):
     """
     Class that provides all UI components and signals to work with them, also it builds main logical dependencies
+    in plotter and parser
     """
 
-    def __init__(self, navigation: Navigation):
+    def __init__(self, navigation: NavigationModel):
         super().__init__()
 
         self.model = navigation
@@ -53,7 +54,7 @@ class NavigationUi(QtWidgets.QMainWindow):
     def _init_left_layout(self):
         """
         Do not call this method, it is only for internal usage in __init__
-        to build left part of UI
+        to build left part of NavigationUI
         :return:
         """
         # left
@@ -75,7 +76,7 @@ class NavigationUi(QtWidgets.QMainWindow):
     def _init_center_layout(self):
         """
         Do not call this method, it is for internal usage in __init__
-        to build center part of UI
+        to build center part of NavigationUI
         :return:
         """
         self.central_layout = QGridLayout()
@@ -96,6 +97,9 @@ class NavigationUi(QtWidgets.QMainWindow):
         self.left_arrow_btn = QPushButton("<-")
         self.right_arrow_btn = QPushButton("->")
 
+        #self.import_additional_btn = QPushButton("Import")
+        #self.import_adittional_btn.clicked.connect(self.import_additional_file)
+
         self.left_arrow_btn.clicked.connect(self.left_arrow)
         self.right_arrow_btn.clicked.connect(self.right_arrow)
 
@@ -115,7 +119,7 @@ class NavigationUi(QtWidgets.QMainWindow):
     def _init_right_layout(self):
         """
         Do not call this method, it is only for internal usage in __init__
-        to build right part of UI
+        to build right part of NavigationUI
         :return:
         """
         self.right_layout = QGridLayout()
@@ -217,16 +221,15 @@ class NavigationUi(QtWidgets.QMainWindow):
         self.content.clear()
         f = str(self.format_selection.currentText())
         try:
-            #TODO change as str(Format)
             form = Factory.create(f)
-            self.content.append(form.to_str(self.model.info[self.model.ind]))
-            pass
-            """
-            for k, val in self.model.info[self.model.ind].items():
-                self.content.append(str(k) + ": " + str(val) + "\n")
-            """
+            try:
+                self.content.append(form.to_str(self.model.info[self.model.ind]))
+            except KeyError as ke:
+                self.content.append(form.to_str(self.model.info))
+
         except:
-            raise ValueError(f"There was en error while loading {form.name()} content")
+            NavigationUi.error("File error", f"There was en error while loading {form.name()} content",
+                                    "idk what to do lol")
 
     def _update_intervals(self):
         """
@@ -322,14 +325,14 @@ class NavigationUi(QtWidgets.QMainWindow):
             self.model.cur_file = filename
             self.model.ind = 0
             self.model.cur_format = f
-        except:
-            NavigationUi.error("Import error", "There was an error while trying to open file", "Error")
+        except Exception as e:
+            NavigationUi.error("There was an error while trying to open file", str(e), "Error")
             return
 
         try:
             self._update_ui()
         except:
-            self.error("Format error", "There was an error with format, change format or file", "Error")
+            NavigationUi.error("Format error", "There was an error with format, change format or file", "Error")
 
     def export_file(self):
         """
