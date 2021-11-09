@@ -17,9 +17,11 @@ class NavigationModel:
     """
 
     def __init__(self):
+        self.additional_file = ""
         self.cur_file = ""
         self.cur_format = ""
         self.info = []
+        self.stat = {}
         self.ind = 0
 
 
@@ -97,8 +99,11 @@ class NavigationUi(QtWidgets.QMainWindow):
         self.left_arrow_btn = QPushButton("<-")
         self.right_arrow_btn = QPushButton("->")
 
-        #self.import_additional_btn = QPushButton("Import")
-        #self.import_adittional_btn.clicked.connect(self.import_additional_file)
+        self.import_additional_btn = QPushButton("Import stat")
+        self.import_additional_btn.clicked.connect(self.import_additional_file)
+
+        self.refresh_btn = QPushButton("Refresh")
+        self.refresh_btn.clicked.connect(self.refresh)
 
         self.left_arrow_btn.clicked.connect(self.left_arrow)
         self.right_arrow_btn.clicked.connect(self.right_arrow)
@@ -114,7 +119,9 @@ class NavigationUi(QtWidgets.QMainWindow):
         self.central_layout.addWidget(self.format_selection, 8, 0)
         self.central_layout.addWidget(self.left_arrow_btn, 10, 0)
         self.central_layout.addWidget(self.right_arrow_btn, 12, 0)
-        self.central_layout.addLayout(QGridLayout(), 14, 0, 6, 1)
+        self.central_layout.addWidget(self.import_additional_btn, 14, 0)
+        self.central_layout.addWidget(self.refresh_btn, 16, 0)
+        self.central_layout.addLayout(QGridLayout(), 18, 0, 6, 1)
 
     def _init_right_layout(self):
         """
@@ -208,8 +215,14 @@ class NavigationUi(QtWidgets.QMainWindow):
             form = Factory().create(f)
             plot_keys = form.plot_keys()
             var = [el for el in plot_keys]
+            if self.model.additional_file:
+                try:
+                    for val in form.plot_stat:
+                        var.append(val)
+                except:
+                    pass
 
-        for val in var:
+        for val in set(var):
             self.cur_x.addItem(val)
             self.cur_y.addItem(val)
 
@@ -311,6 +324,35 @@ class NavigationUi(QtWidgets.QMainWindow):
         msg.exec()
 
     # signals
+    def import_additional_file(self):
+        """
+        signal to connect with Import-button and load all components of UI
+        :return:
+        """
+        filename = QtWidgets.QFileDialog.getOpenFileName(self, 'Open file')
+        f = Statistic.name()
+
+        try:
+            form = Factory.create(f)
+            self.model.stat = form.load(filename[0])
+            self.model.additional_file = filename
+
+        except Exception as e:
+            NavigationUi.error("There was an error while trying to open file", str(e), "Error")
+            return
+
+        try:
+            self._update_ui()
+        except:
+            NavigationUi.error("Format error", "There was an error with format, change format or file", "Error")
+
+    def refresh(self):
+        self.model.cur_format = ""
+        self.model.cur_file = ""
+        self.model.info = []
+        self.model.additional_file = ""
+        self.model.stat = {}
+
     def import_file(self):
         """
         signal to connect with Import-button and load all components of UI
@@ -429,6 +471,7 @@ class NavigationUi(QtWidgets.QMainWindow):
         x_measure = ""
         y_measure = ""
         f = self.format_selection.currentText()
+        form = Factory().create(f)
 
         try:
             builder = ValueBuilder(f, cur_x, cur_y, self.get_info_in_cur_intervals())
@@ -438,19 +481,15 @@ class NavigationUi(QtWidgets.QMainWindow):
 
         try:
             x_measure, y_measure = builder.get_measures()
-            builder.plot(self.graph_widget)
-            self.graph_widget.plot(x, y)
+
+            if cur_x in form.plot_stat and cur_y in form.plot_stat and self.model.additional_file:
+                builder.plot_with_stat(self.graph_widget, self.model.stat)
+            else:
+                builder.plot(self.graph_widget)
+
+            #self.graph_widget.plot(x, y)
             self.graph_widget.setLabel('left', cur_y + ", " + y_measure)
             self.graph_widget.setLabel('bottom', cur_x + ", " + x_measure)
         except BaseException as be:
-            self.error("X or Y error", "Can't convert and plot data", str(be))
+            self.error("Can't convert and plot data", str(be), "Error")
             return
-
-        # TODO Подумать об ограничениях
-        '''
-        try:
-            pass
-            self.graph_widget.setXRange(min(x), max(x))
-        except:
-            return
-        '''

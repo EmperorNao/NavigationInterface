@@ -14,7 +14,7 @@ class Statistic(Format):
     def __init__(self):
         self.name = "Statistic"
         self.matrixes = ["COV_MATRIX", "REV_SKO", "COR_MATRIX"]
-        self.arrays = ["SKO", "FAKE_SKO", "More than 3 sigma"]
+        self.arrays = ["MEAN", "SKO", "FAKE_SKO", "More than 3 sigma"]
         self.keys = ["main", "additional", "difference"]
         self.plot_vars = []
 

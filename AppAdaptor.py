@@ -44,6 +44,20 @@ class ValueBuilder:
         except ValueError as ve:
             raise ve
 
+    def plot_with_stat(self, plotter, stat):
+        """
+        method that call form to plot values with stat
+        :param stat: statistics
+        :param plotter: plotter to plot
+        :return:
+        """
+        try:
+            self.form.plot_with_stat(self.cur_x, self.cur_y, self.info, stat, plotter)
+        except KeyError as ke:
+            raise ke
+        except ValueError as ve:
+            raise ve
+
 
 class Factory:
     """

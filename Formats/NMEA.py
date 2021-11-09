@@ -27,6 +27,8 @@ class Nmea(Format):
         }
         self.plot_vars = ["TIME", "MSL_ALTITUDE", "LATITUDE", "LONGITUDE", "HDOP", "PDOP", "VDOP", "SPEED_OVER_GROUND",
                           "COURSE_OVER_GROUND", "ELEVATION", "AZIMUTH", "SNR"]
+        self.plot_stat = ["TIME", "SOLUTION_LONGITUDE", "SOLUTION_LATITUDE", "SOLUTION_MSL_ALTITUDE",
+                          "DEVIATION_LONGITUDE", "DEVIATION_LATITUDE", "DEVIATION_MSL_ALTITUDE"]
 
     @staticmethod
     def name():
@@ -124,6 +126,18 @@ class Nmea(Format):
             return "degrees"
         elif f == "SNR":
             return "DBHz"
+        elif f == "DEVIATION_LATITUDE":
+            return ""
+        elif f == "DEVIATION_LONGITUDE":
+            return ""
+        elif f == "DEVIATION_MSL_ALTITUDE":
+            return ""
+        elif f == "SOLUTION_LATITUDE":
+            return ""
+        elif f == "SOLUTION_LONGITUDE":
+            return ""
+        elif f == "SOLUTION_MSL_ALTITUDE":
+            return ""
         else:
             raise KeyError("Don't find right format for NMEA")
 
@@ -138,7 +152,7 @@ class Nmea(Format):
             raise ValueError("Value in str was empty")
 
         if f == "TIME":
-            return int(s.hour) * 60 + int(s.minute) + float(s.second) / 60 + float(s.microsecond) / (60 * 1000)
+            return int(s.hour) * 60 + int(s.minute) + float(s.second) / 60 + float(s.microsecond) / (60 * 1000 * 1000)
         elif f == 'LATITUDE':
             return float(s)
         elif f == 'N/S':
@@ -468,11 +482,11 @@ class Nmea(Format):
 
                 x = []
                 y = []
-                for x_, y_ in d[id]:
-                    x.append(x_)
-                    y.append(y_)
+            for x_, y_ in d[id]:
+                x.append(x_)
+                y.append(y_)
 
-                plotter.plot(x, y, pen=pyqtgraph.mkPen(colors[i % (len(colors))], width = 3), name=id)
+            plotter.plot(x, y, pen=pyqtgraph.mkPen(colors[i % (len(colors))], width = 3), name=id)
 
             xs = []
             ys = []
@@ -524,6 +538,125 @@ class Nmea(Format):
                      for el in info[k]]
 
         plotter.plot(x, y)
+
+    def plot_with_stat(self, format_x, format_y, info: [dict] = [], stat: dict = dict(), plotter=None):
+
+        spl_x = format_x.split("_")
+        var_x = "_".join(spl_x[1:])
+        spl_y = format_y.split("_")
+        var_y = "_".join(spl_y[1:])
+
+        statistic = []
+        if "difference" in stat.keys():
+            statistic = stat["difference"]
+        else:
+            statistic = stat["main"]
+
+        x_data = []
+        if spl_x[0] == "SOLUTION":
+
+            x_data.append([])
+            for el in info:
+                if var_x in el["GPGGA"].keys():
+                    x_data[0].append(el["GPGGA"][var_x])
+
+            ind = 0
+            if var_x == "LATITUDE":
+                ind = 0
+            elif var_x == "LONGITUDE":
+                ind = 1
+            elif var_x == "MSL_ALTITUDE":
+                ind = 2
+
+            mean = statistic["MEAN"][ind]
+
+            x_data.append([])
+            for el in x_data[0]:
+                x_data[1].append(mean)
+
+        elif spl_x[0] == "DEVIATION":
+
+            values = []
+            for el in info:
+                if var_x in el["GPGGA"].keys():
+                    values.append(el["GPGGA"][var_x])
+
+            ind = 0
+            if var_x == "LATITUDE":
+                ind = 0
+            elif var_x == "LONGITUDE":
+                ind = 1
+            elif var_x == "MSL_ALTITUDE":
+                ind = 2
+
+            mean = statistic["MEAN"][ind]
+
+            x_data.append([])
+            for el in values:
+                x_data[0].append(abs(el - mean))
+
+        elif spl_x[0] == "TIME":
+            x_data.append([])
+            for el in info:
+                x_data[0].append(self.value(el["GPGGA"]["TIME"], "TIME"))
+
+        y_data = []
+        if spl_y[0] == "SOLUTION":
+
+            y_data.append([])
+            for el in info:
+                if var_y in el["GPGGA"].keys():
+                    y_data[0].append(el["GPGGA"][var_y])
+
+            ind = 0
+            if var_y == "LATITUDE":
+                ind = 0
+            elif var_y == "LONGITUDE":
+                ind = 1
+            elif var_y == "MSL_ALTITUDE":
+                ind = 2
+
+            mean = statistic["MEAN"][ind]
+
+            y_data.append([])
+            for el in y_data[0]:
+                y_data[1].append(mean)
+
+        elif spl_y[0] == "DEVIATION":
+
+            values = []
+            for el in info:
+                if var_y in el["GPGGA"].keys():
+                    values.append(el["GPGGA"][var_y])
+
+            ind = 0
+            if var_y == "LATITUDE":
+                ind = 0
+            elif var_y == "LONGITUDE":
+                ind = 1
+            elif var_y == "MSL_ALTITUDE":
+                ind = 2
+
+            mean = statistic["MEAN"][ind]
+
+            y_data.append([])
+            for el in values:
+                y_data[0].append(abs(el - mean))
+
+        elif spl_y[0] == "TIME":
+            y_data.append([])
+            for el in info:
+                y_data[0].append(self.value(el["GPGGA"]["TIME"], "TIME"))
+
+        colors = ["w", "r", "c", "m", "y", "k", "w"]
+        for i, y in enumerate(y_data):
+            min_len = len(x_data[0])
+            if len(x_data[0]) != len(y):
+                min_len = min(len(x_data[0]), len(y))
+
+            plotter.plot(x_data[0][:min_len], y[:min_len], pen=pyqtgraph.mkPen(colors[i % (len(colors))], width=3), name=id)
+
+            #plotter.plot(x_data[0][:min_len], y[:min_len])
 
     def upload(self, filename: str = "", info: [dict] = []):
         """

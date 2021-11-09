@@ -3,7 +3,7 @@ from GUI.NavigationUI import NavigationModel, NavigationUi
 from PyQt5 import QtWidgets
 import sys
 
-TEST_MODE = "navigation"
+TEST_MODE = "navigation"#"stat"#
 
 
 if __name__ == "__main__":
@@ -11,19 +11,15 @@ if __name__ == "__main__":
     # Create an instance of `QApplication`
     app = QtWidgets.QApplication(sys.argv)
     # Show the calculator's GUI
-    if TEST_MODE:
-        app_mode = TEST_MODE
-        if app_mode == "stat":
-            model = StatisticModel()
-            view = StatisticUi(model)
 
-        elif app_mode == "navigation":
-            model = NavigationModel()
-            view = NavigationUi(model)
+    if len(sys.argv) > 1 or TEST_MODE != "":
 
-    if len(sys.argv) > 1 and not TEST_MODE:
+        app_mode = ""
+        if len(sys.argv) > 1:
+            app_mode = sys.argv[1]
+        else:
+            app_mode = TEST_MODE
 
-        app_mode = sys.argv[1]
         if app_mode == "stat":
             model = StatisticModel()
             view = StatisticUi(model)
@@ -35,8 +31,7 @@ if __name__ == "__main__":
         else:
             print("Wrong argument was provided, expected on of: 'navigation' or 'stat'")
 
-    elif not TEST_MODE:
-
+    else:
         print("Please, provide one of arguments"
               "\n'navigation' - as main application"
               "\n'stat' - as application to count statistics")

@@ -22,7 +22,7 @@ class StatCounter:
             except:
                 l = 0
             try:
-                phi = form.value(el["GRGGA"]["LATITUDE"], "LATITUDE")
+                phi = form.value(el["GPGGA"]["LATITUDE"], "LATITUDE")
             except:
                 phi = 0
 
@@ -69,7 +69,7 @@ class StatCounter:
             Q = np.sum((delta_p > (3 * SKO)), axis=0)
 
             stat_info = {
-                "MEAN": p_mean,
+                "MEAN": p_mean[0],
                 "COV_MATRIX": K,
                 "SKO": SKO,
                 "FAKE_SKO": fake_SKO,
