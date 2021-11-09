@@ -5,6 +5,9 @@ pip install -r requirements.txt
 ```
 Запуск
 ```
-python App.py
+python App.py arg
 ```
+arg = "stat" для запуска приложения с расчётом статистики
+
+arg = "navigation" для запуска приложения с построением показателей
 
