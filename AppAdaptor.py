@@ -2,9 +2,10 @@ from formats.Format import *
 from formats.SGK_T import SgkT
 from formats.NMEA import Nmea
 from formats.Statistic import Statistic
+from formats.ETK import ETK
 
 
-FORMATS = {("%s" % SgkT.name()), ("%s" % Nmea.name()), ("%s" % Statistic.name())}
+FORMATS = {("%s" % SgkT.name()), ("%s" % Nmea.name()), ("%s" % Statistic.name()), ("%s" % ETK.name())}
 
 
 class ValueBuilder:
@@ -81,6 +82,8 @@ class Factory:
             return Nmea()
         if format == Statistic.name():
             return Statistic()
+        if format == ETK.name():
+            return ETK()
         else:
             raise ValueError
 

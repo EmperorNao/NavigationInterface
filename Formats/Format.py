@@ -15,6 +15,7 @@ class Format:
         # plottable variables in format
         self.plot_vars = []
         self.plot_stat = []
+        self.interval = "TIME"
         pass
 
     def var_keys(self):

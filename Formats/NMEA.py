@@ -29,6 +29,7 @@ class Nmea(Format):
                           "COURSE_OVER_GROUND", "ELEVATION", "AZIMUTH", "SNR"]
         self.plot_stat = ["TIME", "SOLUTION_LONGITUDE", "SOLUTION_LATITUDE", "SOLUTION_MSL_ALTITUDE",
                           "DEVIATION_LONGITUDE", "DEVIATION_LATITUDE", "DEVIATION_MSL_ALTITUDE"]
+        self.interval = "TIME"
 
     @staticmethod
     def name():

@@ -1,16 +1,24 @@
-class SgkT(Format):
+from formats.Format import Format
+import datetime as dt
+from datetime import date
+from datetime import time
+from datetime import datetime
+import pandas as pd
+import pyqtgraph
+from math import modf
+
+
+class ETK(Format):
     """
     Class which represent GLOSPASE SGK-T format
     """
 
     def __init__(self):
-        self.name = "SGK_T"
-        self.keys = ['DEVICE_ID', 'DATE', 'TIME', 'LATITUDE', 'N/S', 'LONGITUDE', 'E/W',
-                'SPEED', 'COURSE', 'ALTITUDE', 'ODOMETER', 'IO_STATUS', 'EVENT_ID', 'AIN1', 'AIN2',
-                'FIX_MODE', ('%s_SAT_NO' % self.name), 'GPS_SAT_NO', 'HDOP']
-        self.plot_vars = ['TIME', 'LATITUDE', 'LONGITUDE',
-                'SPEED', 'COURSE', 'ALTITUDE', 'HDOP']
+        self.name = "ETK"
+        self.keys = ["Время", "Скорость", "Координаты"]#, "Положение"]
+        self.plot_vars = ['TIME', 'DATE', 'DATETIME', 'SPEED', 'LONGITUDE', 'LATITUDE']
         self.plot_stat = []
+        self.interval = "DATETIME"
 
     @staticmethod
     def name():
@@ -18,7 +26,7 @@ class SgkT(Format):
 
         :return: format name
         """
-        return "SGK_T"
+        return "ETK"
 
     def to_str(self, d: dict = {}) -> str:
         """
@@ -39,46 +47,22 @@ class SgkT(Format):
         :return: tuple of value and measure
         """
         if s == '':
-            raise ValueError
+            raise ValueError("Empty str was provided for value")
 
-        if f == 'DEVICE_ID':
-            raise ValueError
         elif f == 'DATE':
             raise ValueError
         elif f == 'TIME':
             return int(s.hour) * 60 + int(s.minute) + float(s.second) / 60
+        elif f == "DATETIME":
+            return s
         elif f == 'LATITUDE':
             return float(s)
-        elif f == 'N/S':
-            raise ValueError
         elif f == 'LONGITUDE':
             return float(s)
-        elif f == 'E/W':
-            raise ValueError
         elif f == 'SPEED':
             return int(s)
-        elif f == 'COURSE':
-            return int(s)
-        elif f == 'ALTITUDE':
-            return int(s)
-        elif f == 'ODOMETER':
-            return int(s)
-        elif f == 'IO_STATUS':
-            return int(s)
-        elif f == 'EVENT_ID':
-            return int(s)
-        elif f == 'AIN1':
-            return float(s)
-        elif f == 'AIN2':
-            return float(s)
-        elif f == 'FIX_MODE':
-            return int(s)
-        elif f == ('%s_SAT_NO' % self.name):
-            return int(s)
-        elif f == 'GPS_SAT_NO':
-            return int(s)
-        elif f == 'HDOP':
-            return float(s)
+        else:
+            raise KeyError(f"Wrong parameter provided to value : {f}")
 
     def measure(self, f: str = '') -> str:
         """
@@ -87,46 +71,20 @@ class SgkT(Format):
         :return: measurement to this format
         """
 
-        if f == 'DEVICE_ID':
-            return "__"
-        elif f == 'DATE':
+        if f == 'DATE':
             return "__"
         elif f == 'TIME':
             return "minute"
+        elif f == "DATETIME":
+            return "minute"
         elif f == 'LATITUDE':
             return "degree"
-        elif f == 'N/S':
-            raise "__"
         elif f == 'LONGITUDE':
             return "degree"
-        elif f == 'E/W':
-            return "__"
         elif f == 'SPEED':
             return "km/h"
-        elif f == 'COURSE':
-            return "__"
-        elif f == 'ALTITUDE':
-            return "__"
-        elif f == 'ODOMETER':
-            return "__"
-        elif f == 'IO_STATUS':
-            return "__"
-        elif f == 'EVENT_ID':
-            return "__"
-        elif f == 'AIN1':
-            return "__"
-        elif f == 'AIN2':
-            return "__"
-        elif f == 'FIX_MODE':
-            return "__"
-        elif f == ('%s_SAT_NO' % self.name):
-            return "__"
-        elif f == 'GPS_SAT_NO':
-            return "__"
-        elif f == 'HDOP':
-            return "__"
         else:
-            raise ValueError
+            raise KeyError(f"Wrong parameter provided to measure : {f}")
 
     def format(self, s: str, f: str = '') -> float:
         """
@@ -136,46 +94,24 @@ class SgkT(Format):
         :return:
         """
         if s == '':
-            raise ValueError
+            raise ValueError("Empty str was in format")
 
-        if f == 'DEVICE_ID':
-            return int(s)
-        elif f == 'DATE':
-            return date(int('20' + s[4:6]), int(s[2:4]), int(s[0:2]))
-        elif f == 'TIME':
-            return time(int(s[0:2]), int(s[2:4]), int(s[4:6]))
-        elif f == 'LATITUDE':
-            return int(s[0:3]) + float(s[3:]) / 60
-        elif f == 'N/S':
-            return s
-        elif f == 'LONGITUDE':
-            return int(s[0:3]) + float(s[3:]) / 60
-        elif f == 'E/W':
-            return s
-        elif f == 'SPEED':
-            return int(s)
-        elif f == 'COURSE':
-            return int(s)
-        elif f == 'ALTITUDE':
-            return int(s)
-        elif f == 'ODOMETER':
-            return int(s)
-        elif f == 'IO_STATUS':
-            return int(s)
-        elif f == 'EVENT_ID':
-            return int(s)
-        elif f == 'AIN1':
-            return float(s)
-        elif f == 'AIN2':
-            return float(s)
-        elif f == 'FIX_MODE':
-            return int(s)
-        elif f == ('%s_SAT_NO' % self.name):
-            return int(s)
-        elif f == 'GPS_SAT_NO':
-            return int(s)
-        elif f == 'HDOP':
-            return float(s)
+        if s == "----":
+            raise ValueError("None value in format")
+
+        elif f == 'Время':
+            return datetime.combine(date(int(s[0:4]), int(s[5:7]), int(s[8:10])),
+                              time(int(s[11:13]), int(s[14:16]), int(s[17:19])))
+        elif f == 'Координаты':
+            spl = s.split(",")
+            longitude = float(spl[0].strip(" "))
+            latitude = float(spl[0].strip(" "))
+            return longitude, latitude
+
+        elif f == 'Скорость':
+            return int(s.split(" ")[0])
+        else:
+            raise KeyError(f"Wrong parameter provided to format : {f}")
 
     def to_format(self, value, f: str = '') -> str:
         """
@@ -184,57 +120,7 @@ class SgkT(Format):
         :param f: format of value
         :return: value for format in string
         """
-        if f == '':
-            raise ValueError
-
-        if f == 'DEVICE_ID':
-            return str(value)
-        elif f == 'DATE':
-            return \
-                str(int(value.day)).rjust(2, '0') + \
-                str(int(value.month)).rjust(2, '0') + \
-                str(int(value.year))[2:]
-
-        elif f == 'TIME':
-            return \
-                str(int(value.hour)).rjust(2, '0') + \
-                str(int(value.minute)).rjust(2, '0') + \
-                str(int(value.second)).rjust(2, '0')
-
-        elif f == 'LATITUDE':
-            frac, whole = modf(value)
-            return str(int(whole)).rjust(3, '0') + (f"%.4f" % (frac * 60)).rjust(7, '0')
-        elif f == 'N/S':
-            return value
-        elif f == 'LONGITUDE':
-            frac, whole = modf(value)
-            return str(int(whole)).rjust(3, '0') + (f"%.4f" % (frac * 60)).rjust(7, '0')
-        elif f == 'E/W':
-            return value
-        elif f == 'SPEED':
-            return str(value)
-        elif f == 'COURSE':
-            return str(value)
-        elif f == 'ALTITUDE':
-            return str(value)
-        elif f == 'ODOMETER':
-            return str(value)
-        elif f == 'IO_STATUS':
-            return str(value)
-        elif f == 'EVENT_ID':
-            return str(value)
-        elif f == 'AIN1':
-            return str(value)
-        elif f == 'AIN2':
-            return str(value)
-        elif f == 'FIX_MODE':
-            return str(value)
-        elif f == ('%s_SAT_NO' % self.name):
-            return str(value)
-        elif f == 'GPS_SAT_NO':
-            return str(value)
-        elif f == 'HDOP':
-            return str(value)
+        pass
 
     def load(self, filename: str = "") -> list:
         """
@@ -242,37 +128,30 @@ class SgkT(Format):
         :return: list of dicts
         """
 
+        c = []
         try:
-            c = []
-            with open(filename, encoding='utf8') as file:
-                for line in file:
-                    d = self.convert(line[:-1])
-                    c.append(d)
-            return c
-        except:
-            raise ValueError
 
-    def convert(self, s: str = '', sep: str = ',') -> dict:
-        """
-        convert one line from format
-        :param s: line
-        :param sep: separator
-        :return: dict of values
-        """
-
-        s = s[:-1]
-        data = s.split(sep)
-        output = {}
-
-        for i, f in enumerate(self.keys):
-            if data[i + 1] != '':
-
+            df = pd.read_csv(filename, delimiter=";")
+            for index, row in df.iterrows():
+                d = {}
                 try:
-                    output[f] = self.format(data[i + 1], f)
+                    dtime = self.format(row['Время'], 'Время')
+                    longitude, latitude = self.format(row['Координаты'], 'Координаты')
+                    speed = self.format(row['Скорость'], 'Скорость')
+                    d["DATETIME"] = dtime
+                    d["LONGITUDE"] = longitude
+                    d["LATITUDE"] = latitude
+                    d["SPEED"] = speed
+                    c.append(d)
                 except:
-                    raise ValueError
+                    pass
 
-        return output
+        except ValueError as ve:
+            raise ve
+        except KeyError as ke:
+            raise ke
+
+        return c
 
     def plot(self, format_x, format_y, info: [dict] = [], plotter: pyqtgraph.PlotWidget = None) -> None:
         """
@@ -298,22 +177,6 @@ class SgkT(Format):
         :param info: data
         :return:
         """
-
-        try:
-            with open(filename, mode="w") as f:
-                for el in info:
-                    out = ["&REPORT"]
-                    for k in self.keys:
-                        if k in el.keys():
-                            out.append(self.to_format(el[k], k))
-                        else:
-                            out.append("")
-                    f.write(",".join(out) + ";\n")
-
-        except ValueError as ve:
-            raise ve
-        except KeyError as ke:
-            raise ke
 
         return
 

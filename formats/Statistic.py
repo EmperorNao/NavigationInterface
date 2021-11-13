@@ -17,6 +17,7 @@ class Statistic(Format):
         self.arrays = ["MEAN", "SKO", "FAKE_SKO", "More than 3 sigma"]
         self.keys = ["main", "additional", "difference"]
         self.plot_vars = []
+        self.interval = "TIME"
 
     @staticmethod
     def name():

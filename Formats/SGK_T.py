@@ -18,6 +18,7 @@ class SgkT(Format):
         self.plot_vars = ['TIME', 'LATITUDE', 'LONGITUDE',
                 'SPEED', 'COURSE', 'ALTITUDE', 'HDOP']
         self.plot_stat = []
+        self.interval = "TIME"
 
     @staticmethod
     def name():

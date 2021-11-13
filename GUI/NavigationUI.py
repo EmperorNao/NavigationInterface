@@ -374,7 +374,7 @@ class NavigationUi(QtWidgets.QMainWindow):
                 self.model.info = []
                 for file in self.model.cur_file:
 
-                    self.model.info.append(form.load(file))
+                    self.model.info += form.load(file)
 
         except Exception as e:
             NavigationUi.error("There was an error while trying to open file", str(e), "Error")
