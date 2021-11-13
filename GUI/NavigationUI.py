@@ -358,15 +358,24 @@ class NavigationUi(QtWidgets.QMainWindow):
         signal to connect with Import-button and load all components of UI
         :return:
         """
-        filename = QtWidgets.QFileDialog.getOpenFileName(self, 'Open file')
+        filename = QtWidgets.QFileDialog.getOpenFileNames(self, 'Open file')
         f = str(self.format_selection.currentText())
 
         try:
             form = Factory.create(f)
-            self.model.info = form.load(filename[0])
-            self.model.cur_file = filename
             self.model.ind = 0
             self.model.cur_format = f
+            if len(filename[0]) == 1:
+                self.model.info = form.load(filename[0][0])
+                self.model.cur_file = filename[0][0]
+
+            else:
+                self.model.cur_file = filename[0]
+                self.model.info = []
+                for file in self.model.cur_file:
+
+                    self.model.info.append(form.load(file))
+
         except Exception as e:
             NavigationUi.error("There was an error while trying to open file", str(e), "Error")
             return
@@ -483,7 +492,10 @@ class NavigationUi(QtWidgets.QMainWindow):
             x_measure, y_measure = builder.get_measures()
 
             if cur_x in form.plot_stat and cur_y in form.plot_stat and self.model.additional_file:
-                builder.plot_with_stat(self.graph_widget, self.model.stat)
+                try:
+                    builder.plot_with_stat(self.graph_widget, self.model.stat)
+                except:
+                    pass
             else:
                 builder.plot(self.graph_widget)
 

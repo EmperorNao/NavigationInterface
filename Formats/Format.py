@@ -14,6 +14,7 @@ class Format:
         self.keys = []
         # plottable variables in format
         self.plot_vars = []
+        self.plot_stat = []
         pass
 
     def var_keys(self):

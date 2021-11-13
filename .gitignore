@@ -3,3 +3,6 @@ env/
 FormatFiles/
 OrgFiles/
 __pycache__/
+
+
+*.csv

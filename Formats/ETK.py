@@ -1,10 +1,3 @@
-from formats.Format import Format
-from datetime import date
-from datetime import time
-import pyqtgraph
-from math import modf
-
-
 class SgkT(Format):
     """
     Class which represent GLOSPASE SGK-T format
