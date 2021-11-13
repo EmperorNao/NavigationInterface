@@ -9,6 +9,7 @@ import pyqtgraph as pg
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QGridLayout
 from PyQt5.QtWidgets import QPushButton
+from datetime import datetime
 
 
 class NavigationModel:
@@ -248,46 +249,81 @@ class NavigationUi(QtWidgets.QMainWindow):
         """
         :return:
         """
-        self.left_x_interval.setText("00:00:00")
-        self.right_x_interval.setText("23:59:59")
+        f = self.model.cur_format
+        form = Factory.create(f)
+        interval = form.interval
+        if interval == "TIME":
+            self.left_x_interval.setText("00:00:00")
+            self.right_x_interval.setText("23:59:59")
+        elif interval == "DATETIME":
+            self.left_x_interval.setText("2000-01-01 00:00:00")
+            self.right_x_interval.setText("2100-01-01 23:59:59")
 
     def get_cur_intervals(self) -> tuple:
         """
         :return: return values of time in start and end intervals
         """
-        val = self.left_x_interval.toPlainText()
-        start_interval = time(0, 0, 0)
-        try:
-            start_interval = NavigationUi.convert_time(val)
-        except:
-            if val != "":
-                self.error("Value error", "Left interval for x in time wasn't specified right",
-                           "Interval for x in time wasn't specified right. Try HH:MM:SS format")
+        f = self.model.cur_format
+        form = Factory.create(f)
+        interval = form.interval
+        if interval == "TIME":
 
-        val = self.right_x_interval.toPlainText()
-        end_interval = time(23, 59, 59)
-        try:
-            end_interval = NavigationUi.convert_time(val)
-        except:
-            if val != "":
-                self.error("Value error", "Right interval for x in time wasn't specified right",
-                           "Interval for x in time wasn't specified right. Try HH:MM:SS format")
-        return start_interval, end_interval
+            start_interval = time(0, 0, 0)
+            try:
+                val = self.left_x_interval.toPlainText()
+                start_interval = NavigationUi.convert_time(val)
+            except:
+                if val != "":
+                    self.error("Value error", "Left interval for x in time wasn't specified right",
+                               "Interval for x in time wasn't specified right. Try HH:MM:SS format")
+
+            val = self.right_x_interval.toPlainText()
+            end_interval = time(23, 59, 59)
+            try:
+                end_interval = NavigationUi.convert_time(val)
+            except:
+                if val != "":
+                    self.error("Value error", "Right interval for x in time wasn't specified right",
+                               "Interval for x in time wasn't specified right. Try HH:mm:SS format")
+
+            return start_interval, end_interval, interval
+
+        elif interval == "DATETIME":
+
+            start_interval = datetime(2000, 1, 1, 0, 0, 0)
+            try:
+                val = self.left_x_interval.toPlainText()
+                start_interval = NavigationUi.convert_datetime(val)
+            except:
+                if val != "":
+                    self.error("Interval for x in time wasn't specified right. Try YYYY-MM-DD HH:mm:SS format", "Left interval for x in time wasn't specified right",
+                               "Value error")
+
+            end_interval = datetime(2100, 1, 1, 23, 59, 59)
+            try:
+                val = self.right_x_interval.toPlainText()
+                end_interval = NavigationUi.convert_datetime(val)
+            except:
+                if val != "":
+                    self.error("Value error", "Right interval for x in time wasn't specified right",
+                               "Interval for x in time wasn't specified right. Try HH:MM:SS format")
+
+            return start_interval, end_interval, interval
 
     def get_info_in_cur_intervals(self) -> list:
         """
         :return: values between current intervals of time
         """
-        start_interval, end_interval = self.get_cur_intervals()
+        start_interval, end_interval, interval = self.get_cur_intervals()
 
         x = []
         try:
             i = 0
-            while i < len(self.model.info) and self.model.info[i]["TIME"] < start_interval:
+            while i < len(self.model.info) and self.model.info[i][interval] < start_interval:
                 i += 1
 
             j = len(self.model.info) - 1
-            while j >= 0 and self.model.info[j]["TIME"] > end_interval:
+            while j >= 0 and self.model.info[j][interval] > end_interval:
                 j -= 1
             return self.model.info[i:j + 1]
 
@@ -304,6 +340,20 @@ class NavigationUi(QtWidgets.QMainWindow):
         t = s.split(":")
         try:
             return time(int(t[0]), int(t[1]), int(t[2]))
+        except:
+            raise ValueError
+
+    @staticmethod
+    def convert_datetime(s: str) -> time:
+        """
+        :param s: str
+        :return: time from s in format HH:MM:SS or raise Exception
+        """
+        dt = s.split(" ")
+        d = dt[0].split("-")
+        t = dt[1].split(":")
+        try:
+            return datetime.combine(date(int(d[0]), int(d[1]), int(d[2])), time(int(t[0]), int(t[1]), int(t[2])))
         except:
             raise ValueError
 

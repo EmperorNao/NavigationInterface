@@ -54,7 +54,7 @@ class ETK(Format):
         elif f == 'TIME':
             return int(s.hour) * 60 + int(s.minute) + float(s.second) / 60
         elif f == "DATETIME":
-            return s
+            return (int(s.year) - 2000) * 355 * 24 * 60 + (date(s.year, 1, 1) - date(s.year, s.month, s.day)).days * 24 * 60 + int(s.hour) * 60 + int(s.minute) + float(s.second) / 60
         elif f == 'LATITUDE':
             return float(s)
         elif f == 'LONGITUDE':
@@ -105,7 +105,7 @@ class ETK(Format):
         elif f == 'Координаты':
             spl = s.split(",")
             longitude = float(spl[0].strip(" "))
-            latitude = float(spl[0].strip(" "))
+            latitude = float(spl[1].strip(" "))
             return longitude, latitude
 
         elif f == 'Скорость':
@@ -165,6 +165,11 @@ class ETK(Format):
 
         try:
             x = [self.value(el[format_x], format_x) for el in info]
+            if format_x == "DATETIME":
+                m_x = min(x)
+                new_x = [el_x - m_x for el_x in x]
+                x = new_x
+
             y = [self.value(el[format_y], format_y) for el in info]
             plotter.plot(x, y)
         except KeyError as ke:
